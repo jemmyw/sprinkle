@@ -148,12 +148,16 @@ module Sprinkle
       
       def rake(name, options = {}, &block)
         @installer = Sprinkle::Installers::Rake.new(self, name, options, &block)        
+      end    
+      
+      def noop(&block)
+        @installer = Sprinkle::Installers::Noop.new(self, name, options, &block)        
       end
       
       def verify(description = '', &block)
         @verifications << Sprinkle::Verify.new(self, description, &block)
-      end
-
+      end  
+      
       def process(deployment, roles)
         return if meta_package?
         
