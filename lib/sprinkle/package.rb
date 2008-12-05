@@ -152,12 +152,17 @@ module Sprinkle
       end    
       
       def noop(&block)
-        @operations <<  Sprinkle::Installers::Noop.new(self, name, options, &block)        
+        @operations <<  Sprinkle::Installers::Noop.new(self, &block)        
       end
             
+      def config(&block) 
+        @operations <<  Sprinkle::Installers::Config.new(self, &block)
+      end
+
       def verify(description = '', &block)
         @verifications << Sprinkle::Verify.new(self, description, &block)
-      end            
+      end           
+      
       
       def process(deployment, roles)
         return if meta_package?

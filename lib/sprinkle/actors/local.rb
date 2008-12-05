@@ -23,6 +23,23 @@ module Sprinkle
           return false if $?.to_i != 0
         end
         return true
+      end            
+      
+      def put(name, uploads, roles, suppress_and_return_failures = false)
+        uploads.each do |file, content|               
+          retried = false
+          begin   
+            File.open(file, "w+") { |fp| fp << content }
+          rescue Errno::ENOENT
+            FileUtils.mkdir_p(File.dirname(file))
+            if retried == false
+              retried = true
+              retry 
+            end     
+          end
+        end
+
+        return true
       end
       
     end

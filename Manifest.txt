@@ -49,6 +49,8 @@ lib/sprinkle/installers/rake.rb
 lib/sprinkle/installers/rpm.rb
 lib/sprinkle/installers/source.rb
 lib/sprinkle/installers/yum.rb
+lib/sprinkle/installers/config.rb
+lib/sprinkle/installers/noop.rb
 lib/sprinkle/package.rb
 lib/sprinkle/policy.rb
 lib/sprinkle/script.rb
