@@ -107,7 +107,7 @@ module Sprinkle
 
     class Package #:nodoc:
       include ArbitraryOptions
-      attr_accessor :name, :provides, :installers, :dependencies, :recommends, :verifications
+      attr_accessor :name, :provides, :operations, :dependencies, :recommends, :verifications
 
       def initialize(name, metadata = {}, &block)
         raise 'No package name supplied' unless name
@@ -117,47 +117,47 @@ module Sprinkle
         @dependencies = []
         @recommends = []
         @verifications = []
-        @installers = []
+        @operations = []
         self.instance_eval(&block)
       end
 
       def apt(*names, &block)
-        @installers <<  Sprinkle::Installers::Apt.new(self, *names, &block)
+        @operations <<  Sprinkle::Installers::Apt.new(self, *names, &block)
       end
 
       def deb(*names, &block)
-        @installers <<  Sprinkle::Installers::Deb.new(self, *names, &block)
+        @operations <<  Sprinkle::Installers::Deb.new(self, *names, &block)
       end
 
       def rpm(*names, &block)
-        @installers <<  Sprinkle::Installers::Rpm.new(self, *names, &block)
+        @operations <<  Sprinkle::Installers::Rpm.new(self, *names, &block)
       end
 
       def yum(*names, &block)
-        @installers <<  Sprinkle::Installers::Yum.new(self, *names, &block)
+        @operations <<  Sprinkle::Installers::Yum.new(self, *names, &block)
       end
 
       def gem(name, options = {}, &block)
         @recommends << :rubygems
-        @installers <<  Sprinkle::Installers::Gem.new(self, name, options, &block)
+        @operations <<  Sprinkle::Installers::Gem.new(self, name, options, &block)
       end
 
       def source(source, options = {}, &block)
         @recommends << :build_essential # Ubuntu/Debian
-        @installers <<  Sprinkle::Installers::Source.new(self, source, options, &block)
+        @operations <<  Sprinkle::Installers::Source.new(self, source, options, &block)
       end
       
       def rake(name, options = {}, &block)
-        @installers <<  Sprinkle::Installers::Rake.new(self, name, options, &block)        
+        @operations <<  Sprinkle::Installers::Rake.new(self, name, options, &block)        
       end    
       
       def noop(&block)
-        @installers <<  Sprinkle::Installers::Noop.new(self, name, options, &block)        
+        @operations <<  Sprinkle::Installers::Noop.new(self, name, options, &block)        
       end
-      
+            
       def verify(description = '', &block)
         @verifications << Sprinkle::Verify.new(self, description, &block)
-      end  
+      end            
       
       def process(deployment, roles)
         return if meta_package?
@@ -175,9 +175,9 @@ module Sprinkle
           end
         end
         
-        @installers.each do |installer|
-          installer.defaults(deployment)
-          installer.process(roles)
+        @operations.each do |installer|
+          installer.defaults(deployment) if installer.responds_to?(:defaults)
+          installer.process(roles)       if installer.responds_to?(:process)
         end
         
         process_verifications(deployment, roles)
@@ -233,7 +233,7 @@ module Sprinkle
       private
 
         def meta_package?
-          @installers.empty?
+          @operations.empty?
         end
     end
   end

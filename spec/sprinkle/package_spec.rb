@@ -22,7 +22,7 @@ describe Sprinkle::Package do
         end
       end
       
-      pre_count = pkg.installers.last.instance_variable_get(:@pre)[:install].length
+      pre_count = pkg.operations.last.instance_variable_get(:@pre)[:install].length
     }.should change { pre_count }.by(1)
 CODE
   end
@@ -66,7 +66,7 @@ CODE
       pkg = package @name do
         gem 'rails'
       end
-      pkg.installers.last.should_not be_nil
+      pkg.operations.last.should_not be_nil
     end
 
     it 'should optionally accept dependencies' do
@@ -116,7 +116,7 @@ CODE
         apt %w( deb1 deb2 )
       end
       pkg.should respond_to(:apt)
-      pkg.installers.last.class.should == Sprinkle::Installers::Apt
+      pkg.operations.last.class.should == Sprinkle::Installers::Apt
     end
 
     it 'should optionally accept an rpm installer' do
@@ -124,7 +124,7 @@ CODE
         rpm %w( rpm1 rpm2 )
       end
       pkg.should respond_to(:rpm)
-      pkg.installers.last.class.should == Sprinkle::Installers::Rpm
+      pkg.operations.last.class.should == Sprinkle::Installers::Rpm
     end
 
     it 'should optionally accept a gem installer' do
@@ -132,7 +132,7 @@ CODE
         gem 'gem'
       end
       pkg.should respond_to(:gem)
-      pkg.installers.last.class.should == Sprinkle::Installers::Gem
+      pkg.operations.last.class.should == Sprinkle::Installers::Gem
     end
 
     it 'should optionally accept a source installer' do
@@ -140,7 +140,7 @@ CODE
         source 'archive'
       end
       pkg.should respond_to(:source)
-      pkg.installers.last.class.should == Sprinkle::Installers::Source
+      pkg.operations.last.class.should == Sprinkle::Installers::Source
     end
 
   end
@@ -152,7 +152,7 @@ CODE
         source 'archive' do; end
       end
       pkg.should respond_to(:source)
-      pkg.installers.last.class.should == Sprinkle::Installers::Source
+      pkg.operations.last.class.should == Sprinkle::Installers::Source
     end
     
     it 'should forward block to installer superclass' do
@@ -200,14 +200,14 @@ CODE
     before do
       @deployment = mock(Sprinkle::Deployment)
       @roles = [ :app, :db ]
-      @installer = mock(Sprinkle::Installers::Installer, :defaults => true, :process => true)
+      @installer = mock(Sprinkle::Installers::Installer, :defaults => true, :process => true, :responds_to? => true)
       @package = package @name do; end
     end
 
     describe 'with an installer' do
 
       before do
-        @package.installers = [@installer]
+        @package.operations = [@installer]
       end
 
       it 'should configure itself against the deployment context' do
@@ -235,7 +235,7 @@ CODE
     describe 'with verifications' do
       before do
         @pkg = create_package_with_blank_verify(3)
-        @pkg.installers = [@installer]
+        @pkg.operations = [@installer]
         @installer.stub!(:defaults)
         @installer.stub!(:process)
       end
@@ -296,7 +296,7 @@ CODE
       @roles = [ :app, :db ]
       @installer = mock(Sprinkle::Installers::Installer, :defaults => true, :process => true)
       @pkg = create_package_with_blank_verify(3)
-      @pkg.installers << @installer
+      @pkg.operations << @installer
       @installer.stub!(:defaults)
       @installer.stub!(:process)
       @logger = mock(ActiveSupport::BufferedLogger, :debug => true, :debug? => true)
