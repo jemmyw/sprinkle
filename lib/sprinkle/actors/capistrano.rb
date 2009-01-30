@@ -79,8 +79,8 @@ module Sprinkle
         task = task_sym(name)        
         
         define_task(task, roles) do
-          uploads.each do |file, content|
-            put file, content
+          uploads.each do |file, upload|
+            put upload[:content], file, upload[:options]
           end
         end
         

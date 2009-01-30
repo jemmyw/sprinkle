@@ -23,12 +23,12 @@ module Sprinkle
         self.instance_eval(&block) if block        
       end                   
       
-      def put(file, content)
-        @pending_uploads[file] = content
+      def put(file, content, options={})
+        @pending_uploads[file] = {:content => content, :options => options}
       end         
       
-      def put_file(file, source)
-        @pending_uploads[file] = open(source).read
+      def put_file(file, source, options={})
+        put(file,open(source).read,options)
       end
       
       def process(roles) #:nodoc:
