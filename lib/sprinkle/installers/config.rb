@@ -12,15 +12,12 @@ module Sprinkle
     #     put '/etc/apache2/ports.conf', 'Listen 8080'
     #   end
     #
-    class Config
-      include Sprinkle::Configurable
-      
+    class Config < Installer
       attr_accessor :package, :delivery, :pending_uploads #:nodoc:
 
       def initialize(package, &block) #:nodoc:
-        @package = package
         @pending_uploads = {}
-        self.instance_eval(&block) if block        
+        super package, &block
       end                   
       
       def put(file, content, options={})
@@ -43,11 +40,20 @@ module Sprinkle
           pending = @pending_uploads.keys.join(", ");
           logger.info "--> #{@package.name} uploading for roles: #{roles}"
           logger.info "    #{pending}"
+          @delivery.process(@package.name, pre_config_commands, roles)
           @delivery.put(@package.name, @pending_uploads, roles)
+          @delivery.process(@package.name, post_config_commands, roles)
         end
         
       end
 
+      def pre_config_commands
+        pre_commands(:install) + pre_commands(:config)
+      end
+    
+      def post_config_commands
+        post_commands(:install) + post_commands(:config)
+      end
 
     end
   end

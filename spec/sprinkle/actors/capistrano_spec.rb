@@ -169,7 +169,7 @@ describe Sprinkle::Actors::Capistrano do
   describe 'generated upload task' do
 
     before do
-      @uploads  = {'hello.txt' => 'world'}
+      @uploads  = {'hello.txt' => {:content =>'world', :options => {} } }
       @roles    = %w( app )
       @name     = 'name'
 
@@ -178,7 +178,7 @@ describe Sprinkle::Actors::Capistrano do
     end
 
     it 'should recieve a put command for the pending upload' do
-      @cap.config.should_receive(:put).with('hello.txt', 'world').and_return(true)
+      @cap.config.should_receive(:put).with('world', 'hello.txt', {}).and_return(true)
     end
 
     it 'should be applicable for the supplied roles' do
