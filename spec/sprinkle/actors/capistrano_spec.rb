@@ -108,7 +108,7 @@ describe Sprinkle::Actors::Capistrano do
     end
 
     it 'should invoke capistrano task after creation' do
-      @cap.should_receive(:run).with(@name).and_return
+      @cap.should_receive(:run).with(:install_name_1).and_return
     end
     
     it 'should raise capistrano errors when suppressing parameter is not set' do
@@ -158,13 +158,37 @@ describe Sprinkle::Actors::Capistrano do
 
     it 'should be applicable for the supplied roles' do
       @cap.stub!(:run).and_return
-      @cap.config.should_receive(:task).with(:install_name, :roles => @roles).and_return
+      @cap.config.should_receive(:task).with(:install_name_1, :roles => @roles).and_return
     end
 
     after do
       @cap.process @name, @commands, @roles
     end
+  end
 
+  describe 'generated upload task' do
+
+    before do
+      @uploads  = {'hello.txt' => 'world'}
+      @roles    = %w( app )
+      @name     = 'name'
+
+      @cap = create_cap do; config { put 'hello.txt', 'world'}; end
+      @cap.config.stub!(:put).and_return
+    end
+
+    it 'should recieve a put command for the pending upload' do
+      @cap.config.should_receive(:put).with('hello.txt', 'world').and_return(true)
+    end
+
+    it 'should be applicable for the supplied roles' do
+      @cap.stub!(:run).and_return
+      @cap.config.should_receive(:task).with(:install_name_1, :roles => @roles).and_return
+    end
+
+    after do
+      @cap.put @name, @uploads, @roles
+    end
   end
 
 end

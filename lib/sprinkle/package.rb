@@ -107,7 +107,7 @@ module Sprinkle
 
     class Package #:nodoc:
       include ArbitraryOptions
-      attr_accessor :name, :provides, :installer, :dependencies, :recommends, :verifications
+      attr_accessor :name, :provides, :operations, :dependencies, :recommends, :verifications
 
       def initialize(name, metadata = {}, &block)
         raise 'No package name supplied' unless name
@@ -117,63 +117,73 @@ module Sprinkle
         @dependencies = []
         @recommends = []
         @verifications = []
-        self.instance_eval &block
+        @operations = []
+        self.instance_eval(&block)
       end
 
       def freebsd_pkg(*names, &block)
-        @installer = Sprinkle::Installers::FreebsdPkg.new(self, *names, &block)
+        @operations << Sprinkle::Installers::FreebsdPkg.new(self, *names, &block)
       end
       
       def openbsd_pkg(*names, &block)
-        @installer = Sprinkle::Installers::OpenbsdPkg.new(self, *names, &block)
+        @operations << Sprinkle::Installers::OpenbsdPkg.new(self, *names, &block)
       end
       
       def opensolaris_pkg(*names, &block)
-        @installer = Sprinkle::Installers::OpensolarisPkg.new(self, *names, &block)
+        @operations << Sprinkle::Installers::OpensolarisPkg.new(self, *names, &block)
       end
       
       def bsd_port(port, &block)
-        @installer = Sprinkle::Installers::BsdPort.new(self, port, &block)
+        @operations << Sprinkle::Installers::BsdPort.new(self, port, &block)
       end
       
       def mac_port(port, &block)
-        @installer = Sprinkle::Installers::MacPort.new(self, port, &block)
+        @operations <<  Sprinkle::Installers::MacPort.new(self, port, &block)
       end
 
       def apt(*names, &block)
-        @installer = Sprinkle::Installers::Apt.new(self, *names, &block)
+        @operations <<  Sprinkle::Installers::Apt.new(self, *names, &block)
       end
 
       def deb(*names, &block)
-        @installer = Sprinkle::Installers::Deb.new(self, *names, &block)
+        @operations <<  Sprinkle::Installers::Deb.new(self, *names, &block)
       end
 
       def rpm(*names, &block)
-        @installer = Sprinkle::Installers::Rpm.new(self, *names, &block)
+        @operations <<  Sprinkle::Installers::Rpm.new(self, *names, &block)
       end
 
       def yum(*names, &block)
-        @installer = Sprinkle::Installers::Yum.new(self, *names, &block)
+        @operations <<  Sprinkle::Installers::Yum.new(self, *names, &block)
       end
 
       def gem(name, options = {}, &block)
         @recommends << :rubygems
-        @installer = Sprinkle::Installers::Gem.new(self, name, options, &block)
+        @operations <<  Sprinkle::Installers::Gem.new(self, name, options, &block)
       end
 
       def source(source, options = {}, &block)
         @recommends << :build_essential # Ubuntu/Debian
-        @installer = Sprinkle::Installers::Source.new(self, source, options, &block)
+        @operations <<  Sprinkle::Installers::Source.new(self, source, options, &block)
       end
       
       def rake(name, options = {}, &block)
-        @installer = Sprinkle::Installers::Rake.new(self, name, options, &block)        
-      end
+        @operations <<  Sprinkle::Installers::Rake.new(self, name, options, &block)        
+      end    
       
-      def verify(description = '', &block)
-        @verifications << Sprinkle::Verify.new(self, description, &block)
+      def noop(&block)
+        @operations <<  Sprinkle::Installers::Noop.new(self, &block)        
+      end
+            
+      def config(&block) 
+        @operations <<  Sprinkle::Installers::Config.new(self, &block)
       end
 
+      def verify(description = '', &block)
+        @verifications << Sprinkle::Verify.new(self, description, &block)
+      end           
+      
+      
       def process(deployment, roles)
         return if meta_package?
         
@@ -189,9 +199,11 @@ module Sprinkle
             # Continue
           end
         end
-
-        @installer.defaults(deployment)
-        @installer.process(roles)
+        
+        @operations.each do |installer|
+          installer.defaults(deployment) if installer.responds_to?(:defaults)
+          installer.process(roles)       if installer.responds_to?(:process)
+        end
         
         process_verifications(deployment, roles)
       end
@@ -246,7 +258,7 @@ module Sprinkle
       private
 
         def meta_package?
-          @installer == nil
+          @operations.empty?
         end
     end
   end
