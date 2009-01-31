@@ -24,6 +24,13 @@ describe Sprinkle::Policy do
       p.requires :appserver
       p.packages.should == [ :appserver ]
     end
+    
+    it 'should accept package dependencies using the configures alias' do
+      p = policy @name, :roles => :app do; end
+      p.should respond_to(:configures)
+      p.configures :appserver
+      p.packages.should == [ :appserver ]
+    end
 
     it 'should optionally accept package dependencies with versions' do
       p = policy @name, :roles => :app do; end
