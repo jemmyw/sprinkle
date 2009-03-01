@@ -25,6 +25,9 @@ module Sprinkle
         return true
       end
       
+      def find_servers(role)
+        ['localhost']
+      end
     end
   end
 end

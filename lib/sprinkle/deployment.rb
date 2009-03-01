@@ -54,6 +54,10 @@ module Sprinkle
       def delivery(type, &block) #:doc:
         @style = Actors.const_get(type.to_s.titleize).new &block
       end
+      
+      def find_servers(role)
+        style.find_servers(role)
+      end
 
       def method_missing(sym, *args, &block) #:nodoc:
         @defaults[sym] = block

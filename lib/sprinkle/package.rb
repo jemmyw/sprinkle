@@ -176,38 +176,45 @@ module Sprinkle
 
       def process(deployment, roles)
         return if meta_package?
-        
-        # Run a pre-test to see if the software is already installed. If so,
-        # we can skip it, unless we have the force option turned on!
-        unless @verifications.empty? || Sprinkle::OPTIONS[:force]
-          begin
-            process_verifications(deployment, roles, true)
+                
+        roles = [roles].flatten
+        roles.each do |role|
+          servers = deployment.find_servers(role)
+          
+          servers.each do |server|            
+            # Run a pre-test to see if the software is already installed. If so,
+            # we can skip it, unless we have the force option turned on!
+            unless @verifications.empty? || Sprinkle::OPTIONS[:force]
+              begin
+                process_verifications(deployment, server, true)
             
-            logger.info "--> #{self.name} already installed for roles: #{roles}"
-            return
-          rescue Sprinkle::VerificationFailed => e
-            # Continue
+                logger.info "--> #{self.name} already installed for server: #{server}"
+                next
+              rescue Sprinkle::VerificationFailed => e
+                # Continue
+              end
+            end
+
+            @installer.defaults(deployment)
+            @installer.process(server)
+        
+            process_verifications(deployment, server)
           end
         end
-
-        @installer.defaults(deployment)
-        @installer.process(roles)
-        
-        process_verifications(deployment, roles)
       end
       
-      def process_verifications(deployment, roles, pre = false)
+      def process_verifications(deployment, server, pre = false)
         return if @verifications.blank?
         
         if pre
-          logger.info "--> Checking if #{self.name} is already installed for roles: #{roles}"
+          logger.info "--> Checking if #{self.name} is already installed for server: #{server}"
         else
-          logger.info "--> Verifying #{self.name} was properly installed for roles: #{roles}"
+          logger.info "--> Verifying #{self.name} was properly installed for server: #{server}"
         end
         
         @verifications.each do |v|
           v.defaults(deployment)
-          v.process(roles)
+          v.process(server)
         end
       end
 

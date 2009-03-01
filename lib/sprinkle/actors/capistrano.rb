@@ -49,9 +49,13 @@ module Sprinkle
         @config.load script
         @loaded_recipes << script
       end
+      
+      def find_servers(roles)
+        @config.find_servers(:roles => roles).collect(&:host)
+      end
 
-      def process(name, commands, roles, suppress_and_return_failures = false) #:nodoc:
-        define_task(name, roles) do
+      def process(name, commands, server, suppress_and_return_failures = false) #:nodoc:
+        define_task(name, server) do
           via = fetch(:run_method, :sudo)
           commands.each do |command|
             invoke_command command, :via => via
@@ -72,8 +76,8 @@ module Sprinkle
       private
 
         # REVISIT: can we set the description somehow?
-        def define_task(name, roles, &block)
-          @config.task task_sym(name), :roles => roles, &block
+        def define_task(name, server, &block)
+          @config.task task_sym(name), :hosts => server, &block
         end
 
         def run(task)

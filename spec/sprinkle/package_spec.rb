@@ -212,10 +212,15 @@ CODE
 
       it 'should configure itself against the deployment context' do
         @installer.should_receive(:defaults).with(@deployment).and_return
+        @deployment.should_receive(:find_servers).with(:app).and_return(['app1.example.com'])
+        @deployment.should_receive(:find_servers).with(:db).and_return(['db1.example.com'])        
       end
 
       it 'should request the installer to process itself' do
-        @installer.should_receive(:process).with(@roles).and_return
+        @installer.should_receive(:process).with('app1.example.com').and_return
+        @installer.should_receive(:process).with('db1.example.com').and_return
+        @deployment.should_receive(:find_servers).with(:app).and_return(['app1.example.com'])
+        @deployment.should_receive(:find_servers).with(:db).and_return(['db1.example.com'])  
       end
 
       after do
@@ -247,7 +252,9 @@ CODE
         end
         
         it 'should process verifications only once' do
-          @pkg.should_receive(:process_verifications).once
+          @pkg.should_receive(:process_verifications).twice
+          @deployment.should_receive(:find_servers).with(:app).and_return(['app1.example.com'])  
+          @deployment.should_receive(:find_servers).with(:db).and_return(['db1.example.com'])  
           @pkg.process(@deployment, @roles)
         end
         
@@ -264,20 +271,24 @@ CODE
         end
         
         it 'should process verifications twice' do
-          @pkg.should_receive(:process_verifications).once.with(@deployment, @roles, true).and_raise(Sprinkle::VerificationFailed.new(@pkg, ''))
-          @pkg.should_receive(:process_verifications).once.with(@deployment, @roles).and_raise(Sprinkle::VerificationFailed.new(@pkg, ''))
+          @pkg.should_receive(:process_verifications).once.with(@deployment, 'app1.example.com', true).and_raise(Sprinkle::VerificationFailed.new(@pkg, ''))
+          @pkg.should_receive(:process_verifications).once.with(@deployment, 'app1.example.com').and_raise(Sprinkle::VerificationFailed.new(@pkg, ''))
+          @deployment.should_receive(:find_servers).with(:app).and_return(['app1.example.com'])  
         end
         
         it 'should continue with installation if pre-verification fails' do
           @pkg.should_receive(:process_verifications).twice.and_raise(Sprinkle::VerificationFailed.new(@pkg, ''))
           @installer.should_receive(:defaults)
           @installer.should_receive(:process)
+          @deployment.should_receive(:find_servers).with(:app).and_return(['app1.example.com'])  
         end
         
         it 'should only process verifications once and should not process installer if verifications succeed' do
-          @pkg.should_receive(:process_verifications).once.and_return(nil)
+          @pkg.should_receive(:process_verifications).twice.and_return(nil)
           @installer.should_not_receive(:defaults)
           @installer.should_not_receive(:process)
+          @deployment.should_receive(:find_servers).with(:app).and_return(['app1.example.com'])          
+          @deployment.should_receive(:find_servers).with(:db).and_return(['db1.example.com'])               
         end
         
         after do
