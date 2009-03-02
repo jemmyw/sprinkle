@@ -33,6 +33,8 @@ describe Sprinkle::Verify do
         # Check that a gem exists
         has_gem 'rails'
         has_gem 'rails', '2.1.0'
+        
+        has_dpkg 'apache2'
       end
     end
     @verification = @package.verifications[0]
@@ -82,6 +84,10 @@ describe Sprinkle::Verify do
     it 'should check that a ruby gem is installed' do
       @verification.commands.should include("gem list | grep -e '^rails (.*.*)$'")
       @verification.commands.should include("gem list | grep -e '^rails (.*2\\.1\\.0.*)$'")
+    end
+    
+    it 'should check that a dpkg package is installed' do
+      @verification.commands.should include("dpkg -s apache2 | grep -e '^Status:.*installed")
     end
   end
   
