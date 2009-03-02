@@ -64,8 +64,7 @@ module Sprinkle
           commands.each do |command|
             invoke_command command, :via => via
           end
-        end
-        
+        end        
 
         begin
           run(task)
@@ -104,15 +103,15 @@ module Sprinkle
 
         # REVISIT: can we set the description somehow?
         def define_task(name, server, &block)
-          @config.task task_sym(name), :hosts => server, &block
+          @config.task name, :hosts => server, &block
         end
 
         def run(name)
-          @config.send name
+          @config.find_and_execute_task(name)
         end
 
         def task_sym(name)
-          "install_#{name.to_task_name}_#{@name_counters[name] += 1}".to_sym
+          "install_#{name.to_task_name}_#{@name_counters[name] += 1}" #.to_sym
         end
     end
   end
