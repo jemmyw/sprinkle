@@ -25,8 +25,10 @@ module Sprinkle
         @config = ::Capistrano::Configuration.new
         @config.logger.level = Sprinkle::OPTIONS[:verbose] ? ::Capistrano::Logger::INFO : ::Capistrano::Logger::IMPORTANT
         @config.set(:password) { ::Capistrano::CLI.password_prompt }
+        @name_counters = Hash.new { |h, v| h[v] = 0 }
+        
         if block
-          self.instance_eval &block
+          self.instance_eval(&block)
         else
           @config.load 'deploy' # normally in the config directory for rails
         end
@@ -54,23 +56,48 @@ module Sprinkle
         @config.find_servers(:roles => roles).collect(&:host)
       end
 
-      def process(name, commands, server, suppress_and_return_failures = false) #:nodoc:
-        define_task(name, server) do
+      def process(name, commands, server, suppress_and_return_failures = false) #:nodoc:        
+        task = task_sym(name)
+        
+        define_task(task, server) do
           via = fetch(:run_method, :sudo)
           commands.each do |command|
             invoke_command command, :via => via
           end
         end
         
+
         begin
-          run(name)
+          run(task)
+    
           return true
         rescue ::Capistrano::CommandError => e
           return false if suppress_and_return_failures
-          
+
           # Reraise error if we're not suppressing it
           raise
+        end        
+      end          
+      
+      def put(name, uploads, roles, suppress_and_return_failures = false) #:nodoc:                
+        task = task_sym(name)        
+        
+        define_task(task, roles) do
+          uploads.each do |file, upload|
+            put upload[:content], file, upload[:options]
+          end
         end
+        
+        begin
+          run(task)
+    
+          return true
+        rescue ::Capistrano::CommandError => e
+          return false if suppress_and_return_failures
+
+          # Reraise error if we're not suppressing it
+          raise
+        end        
       end
 
       private
@@ -80,12 +107,12 @@ module Sprinkle
           @config.task task_sym(name), :hosts => server, &block
         end
 
-        def run(task)
-          @config.send task_sym(task)
+        def run(name)
+          @config.send name
         end
 
         def task_sym(name)
-          "install_#{name.to_task_name}".to_sym
+          "install_#{name.to_task_name}_#{@name_counters[name] += 1}".to_sym
         end
     end
   end

@@ -66,6 +66,7 @@ module Sprinkle
       def requires(package, options = {})
         @packages << package
       end
+      alias_method :configures, :requires
 
       def to_s; name; end
 
