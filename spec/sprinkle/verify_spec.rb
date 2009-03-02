@@ -80,8 +80,8 @@ describe Sprinkle::Verify do
     end
     
     it 'should check that a ruby gem is installed' do
-      @verification.commands.should include("sudo gem list | grep -e '^rails (.*.*)$'")
-      @verification.commands.should include("sudo gem list | grep -e '^rails (.*2\\.1\\.0.*)$'")
+      @verification.commands.should include("gem list | grep -e '^rails (.*.*)$'")
+      @verification.commands.should include("gem list | grep -e '^rails (.*2\\.1\\.0.*)$'")
     end
   end
   
