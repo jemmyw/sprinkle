@@ -7,7 +7,7 @@ module Sprinkle
       Sprinkle::Verify.register(Sprinkle::Verifiers::Dpkg)
         
       def has_dpkg(name)
-        @commands << "dpkg -s #{name} | grep -e '^Status:.*installed"
+        @commands << "dpkg -s #{name} | grep -e '^Status:.* installed'"
       end
     end
   end

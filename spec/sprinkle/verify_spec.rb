@@ -87,7 +87,7 @@ describe Sprinkle::Verify do
     end
     
     it 'should check that a dpkg package is installed' do
-      @verification.commands.should include("dpkg -s apache2 | grep -e '^Status:.*installed")
+      @verification.commands.should include("dpkg -s apache2 | grep -e '^Status:.* installed'")
     end
   end
   

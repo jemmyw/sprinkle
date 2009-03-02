@@ -58,7 +58,7 @@ module Sprinkle
 
       def process(name, commands, server, suppress_and_return_failures = false) #:nodoc:        
         task = task_sym(name)
-        
+                
         define_task(task, server) do
           via = fetch(:run_method, :sudo)
           commands.each do |command|
