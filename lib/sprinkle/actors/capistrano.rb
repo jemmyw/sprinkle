@@ -111,7 +111,7 @@ module Sprinkle
         end
 
         def task_sym(name)
-          "install_#{name.to_task_name}_#{@name_counters[name] += 1}" #.to_sym
+          "install_#{name.to_task_name}_#{@name_counters[name] += 1}".to_sym
         end
     end
   end

@@ -158,7 +158,7 @@ describe Sprinkle::Actors::Capistrano do
 
     it 'should be applicable for the supplied roles' do
       @cap.stub!(:run).and_return
-      @cap.config.should_receive(:task).with(:install_name_1, :roles => @roles).and_return
+      @cap.config.should_receive(:task).with(:install_name_1, :hosts => @roles).and_return
     end
 
     after do
@@ -183,7 +183,7 @@ describe Sprinkle::Actors::Capistrano do
 
     it 'should be applicable for the supplied roles' do
       @cap.stub!(:run).and_return
-      @cap.config.should_receive(:task).with(:install_name_1, :roles => @roles).and_return
+      @cap.config.should_receive(:task).with(:install_name_1, :hosts => @roles).and_return
     end
 
     after do
