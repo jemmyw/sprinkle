@@ -38,6 +38,8 @@ describe Sprinkle::Verify do
         has_gem 'rails', '2.1.0'
         
         has_dpkg 'apache2'
+
+        has_user 'deployer'
       end
     end
     @verification = @package.verifications[0]
@@ -95,6 +97,10 @@ describe Sprinkle::Verify do
     
     it 'should check that a dpkg package is installed' do
       @verification.commands.should include("dpkg -s apache2 | grep -e '^Status:.* installed'")
+    end
+
+    it 'should check that a user is in passwd' do
+      @verification.commands.should include('cat /etc/passwd | grep -q ^deployer')
     end
   end
   
