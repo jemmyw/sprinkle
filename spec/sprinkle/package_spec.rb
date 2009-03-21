@@ -195,6 +195,12 @@ CODE
 
   end
 
+  describe 'with a custom installer' do
+    it 'should forward block to installer superclass' do
+      check_block_forwarding_on(:custom)
+    end
+  end
+
   describe 'when processing' do
 
     before do

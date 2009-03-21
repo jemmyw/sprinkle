@@ -175,6 +175,10 @@ module Sprinkle
         @installer = Sprinkle::Installers::PushText.new(self, text, path, options, &block)
       end
       
+      def custom(command, &block)
+        @installer = Sprinkle::Installers::Custom.new(self, command, &block)
+      end
+      
       def verify(description = '', &block)
         @verifications << Sprinkle::Verify.new(self, description, &block)
       end
