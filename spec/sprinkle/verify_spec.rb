@@ -40,6 +40,8 @@ describe Sprinkle::Verify do
         has_dpkg 'apache2'
 
         has_user 'deployer'
+
+        has_pear 'Log'
       end
     end
     @verification = @package.verifications[0]
@@ -96,11 +98,15 @@ describe Sprinkle::Verify do
     end
     
     it 'should check that a dpkg package is installed' do
-      @verification.commands.should include("dpkg -s apache2 | grep -e '^Status:.* installed'")
+      @verification.commands.should include("dpkg -s apache2 2>&1 | grep -e '^Status:.* installed'")
     end
 
     it 'should check that a user is in passwd' do
       @verification.commands.should include('cat /etc/passwd | grep -q ^deployer')
+    end
+
+    it 'should check that a pear package is installed' do
+      @verification.commands.should include("pear list --allchannels 2>&1 | grep -e '^Log\\s*.*$'")
     end
   end
   
