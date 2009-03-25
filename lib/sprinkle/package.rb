@@ -176,7 +176,11 @@ module Sprinkle
       end
       
       def custom(command, &block)
-        @installer = Sprinkle::Installers::Custom.new(self, command, &block)
+        @operations <<  Sprinkle::Installers::Custom.new(self, command, &block)
+      end
+
+      def pear(*names, &block)
+        @operations <<  Sprinkle::Installers::Pear.new(self, *names, &block)
       end
       
       def verify(description = '', &block)

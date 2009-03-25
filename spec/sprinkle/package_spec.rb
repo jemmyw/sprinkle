@@ -110,6 +110,14 @@ CODE
   end
 
   describe 'installer configuration' do
+    it 'should optionally accept a pear installer' do
+      pkg = package @name do
+        pear %w( pear1 pear2 )
+      end
+
+      pkg.should respond_to(:pear)
+      pkg.operations.last.should be_a(Sprinkle::Installers::Pear)
+    end
 
     it 'should optionally accept an apt installer' do
       pkg = package @name do
@@ -198,6 +206,12 @@ CODE
   describe 'with a custom installer' do
     it 'should forward block to installer superclass' do
       check_block_forwarding_on(:custom)
+    end
+  end
+
+  describe 'with a pear installer' do
+    it 'should forward block to installer superclass' do
+      check_block_forwarding_on(:pear)
     end
   end
 
