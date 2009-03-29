@@ -4,7 +4,7 @@ module Sprinkle
       Sprinkle::Verify.register(Sprinkle::Verifiers::User)
 
       def has_user(name)
-        @commands << "cat /etc/passwd | grep -q ^#{name}"
+        @commands << "cat /etc/passwd | grep -e '^#{name}'"
       end
     end
   end
