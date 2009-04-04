@@ -43,6 +43,7 @@ lib/sprinkle/extensions/string.rb
 lib/sprinkle/extensions/symbol.rb
 lib/sprinkle/installers/apt.rb
 lib/sprinkle/installers/bsd_port.rb
+lib/sprinkle/installers/config.rb
 lib/sprinkle/installers/deb.rb
 lib/sprinkle/installers/freebsd_pkg.rb
 lib/sprinkle/installers/gem.rb

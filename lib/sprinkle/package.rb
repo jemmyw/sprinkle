@@ -182,6 +182,10 @@ module Sprinkle
       def pear(*names, &block)
         @operations <<  Sprinkle::Installers::Pear.new(self, *names, &block)
       end
+
+      def config(&block)
+        @operations << Sprinkle::Installers::Config.new(self, &block)
+      end
       
       def verify(description = '', &block)
         @verifications << Sprinkle::Verify.new(self, description, &block)

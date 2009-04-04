@@ -12,12 +12,14 @@ describe Sprinkle::Package do
   # Kind of a messy way to do this but it works and DRYs out
   # the specs. Checks to make sure an installer is receiving
   # the block passed to it throught the package block.
-  def check_block_forwarding_on(installer)
+  def check_block_forwarding_on(installer, args = 'archive')
+    args = [args] unless args.is_a?(Array)
+
     eval(<<CODE, binding, __FILE__, __LINE__)
     pre_count = 0
     lambda {
       pkg = package @name do
-        #{installer} 'archive' do
+        #{installer}(*args) do
           pre :install, 'preOp'
         end
       end
@@ -201,6 +203,12 @@ CODE
       check_block_forwarding_on(:gem)
     end
 
+  end
+
+  describe 'with a config installer' do
+    it 'should forward block to installer superclass' do
+      check_block_forwarding_on(:config, [])
+    end
   end
 
   describe 'with a custom installer' do

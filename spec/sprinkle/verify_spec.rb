@@ -102,7 +102,7 @@ describe Sprinkle::Verify do
     end
 
     it 'should check that a user is in passwd' do
-      @verification.commands.should include('cat /etc/passwd | grep -q ^deployer')
+      @verification.commands.should include('cat /etc/passwd | grep -e \'^deployer\'')
     end
 
     it 'should check that a pear package is installed' do
