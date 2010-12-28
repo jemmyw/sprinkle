@@ -70,6 +70,7 @@ lib/sprinkle/verifiers/ruby.rb
 lib/sprinkle/verifiers/symlink.rb
 lib/sprinkle/verifiers/user.rb
 lib/sprinkle/verifiers/pear.rb
+lib/sprinkle/verifiers/command.rb
 lib/sprinkle/verify.rb
 lib/sprinkle/version.rb
 script/destroy
